@@ -1,0 +1,33 @@
+services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./api-gateway:/app
+      - /app/node_modules
+    environment:
+      PORT: 3000
+
+  order-service:
+    build:
+      context: ./order-service
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./order-service:/app
+      - /app/node_modules
+    environment:
+      PORT: 3002
+
+  inventory-service:
+    build:
+      context: ./inventory-service
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./inventory-service:/app
+      - /app/node_modules
+    environment:
+      PORT: 3001

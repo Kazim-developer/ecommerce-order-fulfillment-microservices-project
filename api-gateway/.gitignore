@@ -1,0 +1,21 @@
+# root env
+.env
+.env.*
+
+# logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+
+# node modules (if any at root)
+node_modules
+
+# build folders
+dist
+build
