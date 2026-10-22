@@ -20,7 +20,7 @@ services:
       - /app/node_modules
     environment:
       PORT: 3002
-      DATABASE_URL: postgresql://app_user:786&*^Kazim@postgres:5432/orders_db?schema=public
+      DATABASE_URL: "postgresql://postgres:786%26%2A%5EKazim@postgres:5432/orders_db?schema=public"
 
   inventory-service:
     build:
@@ -32,7 +32,7 @@ services:
       - /app/node_modules
     environment:
       PORT: 3001
-      DATABASE_URL: postgresql://app_user:786&*^Kazim@postgres:5432/inventory_db?schema=public
+      DATABASE_URL: "postgresql://app_user:786%26%2A%5EKazim@postgres:5432/inventory_db?schema=public"
 
   postgres:
     image: postgres:17-alpine
