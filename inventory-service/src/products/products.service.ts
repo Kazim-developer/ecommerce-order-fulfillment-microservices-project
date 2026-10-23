@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ReserveStockDto } from './dto/reserve-stock.dto';
 
 @Injectable()
 export class ProductsService {
@@ -28,6 +29,41 @@ export class ProductsService {
 
       throw error;
     }
+  }
+
+  async reserveStock(productId: string, dto: ReserveStockDto) {
+    return this.prisma.$transaction(async (tx) => {
+      const product = await tx.product.findUnique({
+        where: { id: productId },
+      });
+
+      if (!product) {
+        throw new NotFoundException(`Product with ID "${productId}" not found`);
+      }
+
+      const updated = await tx.product.updateMany({
+        where: {
+          id: productId,
+          availableQuantity: { gte: dto.quantity },
+        },
+        data: {
+          availableQuantity: { decrement: dto.quantity },
+          reservedQuantity: { increment: dto.quantity },
+        },
+      });
+
+      if (updated.count === 0) {
+        throw new ConflictException('Insufficient available stock');
+      }
+
+      return tx.reservation.create({
+        data: {
+          orderId: dto.orderId,
+          productId,
+          quantity: dto.quantity,
+        },
+      });
+    });
   }
 
   async findAll() {

@@ -10,6 +10,7 @@ import {
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ReserveStockDto } from './dto/reserve-stock.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -38,5 +39,10 @@ export class ProductsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productsService.remove(id);
+  }
+
+  @Post(':id/reserve')
+  reserveStock(@Param('id') id: string, @Body() dto: ReserveStockDto) {
+    return this.productsService.reserveStock(id, dto);
   }
 }
