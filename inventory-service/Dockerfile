@@ -1,10 +1,10 @@
 
-FROM node:22-alpine
+FROM node:22-bookworm-slim
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --fetch-retries=5 --fetch-timeout=300000
 
 COPY . .
 

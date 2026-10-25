@@ -12,6 +12,36 @@ import { ReserveStockDto } from './dto/reserve-stock.dto';
 export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async releaseStock(productId: string, orderId: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const reservation = await tx.reservation.findUnique({
+        where: {
+          orderId_productId: {
+            orderId,
+            productId,
+          },
+        },
+      });
+
+      if (!reservation || reservation.status !== 'RESERVED') {
+        return;
+      }
+
+      await tx.reservation.update({
+        where: { id: reservation.id },
+        data: { status: 'RELEASED' },
+      });
+
+      await tx.product.update({
+        where: { id: productId },
+        data: {
+          availableQuantity: { increment: reservation.quantity },
+          reservedQuantity: { decrement: reservation.quantity },
+        },
+      });
+    });
+  }
+
   async create(dto: CreateProductDto) {
     try {
       return await this.prisma.product.create({
