@@ -12,9 +12,6 @@ compensating stock release when a later reservation fails.
   ------------------------------------------------------------------------
   Component             Responsibility                          Local port
   --------------------- --------------------- ----------------------------
-  API Gateway           Entry point for                             `3000`
-                        client requests       
-
   Inventory Service     Product data and                            `3001`
                         stock operations;     
                         exposes product HTTP  
@@ -37,9 +34,11 @@ compensating stock release when a later reservation fails.
                         interface             
   ------------------------------------------------------------------------
 
-The application services run in Docker Compose. Containers communicate
-using Compose service names, such as `postgres` and `rabbitmq`, rather
-than `localhost`.
+There is **no API Gateway** in the current project configuration.
+Clients call the Inventory and Order Service endpoints directly during
+development. The services run in Docker Compose and communicate using
+Compose service names such as `postgres` and `rabbitmq`, rather than
+`localhost` for container-to-container connections.
 
 ## Technology used
 
@@ -55,13 +54,17 @@ than `localhost`.
 
 ``` text
 Postman / Client
-      |
-      v
- API Gateway (:3000)
-
- Inventory Service (:3001) <---- RabbitMQ ----> Order Service (:3002)
-          |                                      |
-          +---------------- PostgreSQL -----------+
+   |                         |
+   v                         v
+Inventory Service       Order Service
+    (:3001)                 (:3002)
+        \                    /
+         \                  /
+          +-- PostgreSQL --+
+                 ^
+                 |
+       RabbitMQ message broker
+       (Order <-> Inventory)
 ```
 
 The Order Service sends stock-reservation and stock-release messages
@@ -95,11 +98,10 @@ services; it is not a distributed database transaction.
 
 ## Environment configuration
 
-The root `.env` file used by Docker Compose contains the following
-settings:
+The root `.env` file used by Docker Compose contains settings similar
+to:
 
 ``` env
-API_GATEWAY_PORT=3000
 INVENTORY_SERVICE_PORT=3001
 ORDER_SERVICE_PORT=3002
 RABBITMQ_PORT=5672
@@ -125,7 +127,7 @@ DATABASE_URL="postgresql://app_user:URL_ENCODED_PASSWORD@postgres:5432/inventory
 ```
 
 Encode special characters in the password when placing it in a URL. Keep
-the actual connection strings in local environment files, not in source
+actual connection strings in local environment files, not in source
 control.
 
 ## Run the project
@@ -142,7 +144,7 @@ Check service status:
 docker compose ps
 ```
 
-View logs for a service:
+View service logs:
 
 ``` bash
 docker compose logs --tail=50 order-service
@@ -155,7 +157,7 @@ Restart one service:
 docker compose restart order-service
 ```
 
-Stop the services without deleting persistent volumes:
+Stop services without deleting persistent volumes:
 
 ``` bash
 docker compose down
