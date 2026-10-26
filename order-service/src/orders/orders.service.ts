@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
@@ -59,7 +64,7 @@ export class OrdersService {
         );
 
         if (!result.success) {
-          throw new Error(result.message);
+          throw new BadRequestException(result.message);
         }
 
         reservedItems.push({
